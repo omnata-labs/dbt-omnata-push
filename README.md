@@ -123,11 +123,6 @@ where 1=1
 
 ```
 
-If you ever want to truncate these tables and start over, pass in the `full-refresh-salesforce` flag like so:
-```
-dbt run --target my_target --vars 'full-refresh-salesforce: true'
-```
-
 ### What else can Omnata do
 
 Omnata's other main product is Omnata Connect, which provides real time access to Snowflake data using Salesforce Connect. No middleware required!
