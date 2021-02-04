@@ -1,0 +1,61 @@
+name: 'omnata_push_integration_tests'
+version: '1.0.0'
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'integration_tests'
+
+# These configurations specify where dbt should look for different types of files.
+# The `source-paths` config, for example, states that models in this project can be
+# found in the "models/" directory. You probably won't need to change these!
+source-paths: ["models"]
+analysis-paths: ["analysis"]
+test-paths: ["tests"]
+data-paths: ["data"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"  # directory which will store compiled SQL files
+clean-targets:         # directories to be removed by `dbt clean`
+    - "target"
+    - "dbt_modules"
+
+vars:
+  full-refresh-salesforce: false
+  clear-job-tables: false
+
+# These functions are mocks for the Omnata Salesforce APIs, which are normally External Functions provided by the Omnata setup process
+on-run-start:
+  - "create or replace function SFDC_BULK_API_CREATE_JOB(operation varchar, table_name varchar, use_serial boolean, external_id_field_name varchar)
+returns variant
+language javascript
+strict
+as '
+return {
+  \"apexProcessingTime\": 1, \"apiActiveProcessingTime\": 1, \"apiVersion\": 42, \"assignmentRuleId\": null, \"concurrencyMode\": \"Parallel\", \"contentType\": \"JSON\", \"createdById\": \"0051D000005w6I5QAI\",
+  \"createdDate\": \"2021-02-03T22:23:17.000+0000\", \"externalIdFieldName\": \"AccountID__c\", \"fastPathEnabled\": false, \"id\": \"7501D000003kWMhQAM\", \"numberBatchesCompleted\": 1, \"numberBatchesFailed\": 0,
+  \"numberBatchesInProgress\": 0, \"numberBatchesQueued\": 0, \"numberBatchesTotal\": 1, \"numberRecordsFailed\": 0, \"numberRecordsProcessed\": 99, \"numberRetries\": 0,
+  \"object\": \"Account\", \"operation\": \"upsert\", \"state\": \"Queued\", \"systemModstamp\": \"2021-02-03T22:23:17.000+0000\", \"totalProcessingTime\": 2411
+}';"
+  - "create or replace function SFDC_BULK_API_LOAD_BATCH(job_id varchar, field_values variant, wait_for_completion boolean)
+returns variant
+language javascript
+strict
+as '
+return {
+  \"created\": true,
+  \"errors\": [],
+  \"id\": \"a001D000003ri4gQAA\",
+  \"success\": true
+}';"
+  - "create or replace function SFDC_BULK_API_CLOSE_JOB(job_id varchar, wait_for_completion boolean)
+returns variant
+language javascript
+strict
+as '
+return {
+  \"apexProcessingTime\": 1, \"apiActiveProcessingTime\": 2280, \"apiVersion\": 42, \"assignmentRuleId\": null, \"concurrencyMode\": \"Parallel\", \"contentType\": \"JSON\", \"createdById\": \"0051D000005w6I5QAI\",
+  \"createdDate\": \"2021-02-03T22:23:17.000+0000\", \"externalIdFieldName\": \"AccountID__c\", \"fastPathEnabled\": false, \"id\": \"7501D000003kWMhQAM\", \"numberBatchesCompleted\": 5, \"numberBatchesFailed\": 0,
+  \"numberBatchesInProgress\": 0, \"numberBatchesQueued\": 0, \"numberBatchesTotal\": 5, \"numberRecordsFailed\": 0, \"numberRecordsProcessed\": 1000, \"numberRetries\": 0,
+  \"object\": \"Account\", \"operation\": \"upsert\", \"state\": \"Closed\", \"systemModstamp\": \"2021-02-03T22:23:17.000+0000\", \"totalProcessingTime\": 2411
+}';"
