@@ -22,7 +22,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 vars:
   full-refresh-salesforce: false
-  clear-job-tables: false
+  drop-omnata-task-tables: false
 
 # These functions are mocks for the Omnata Salesforce APIs, which are normally External Functions provided by the Omnata setup process
 on-run-start:

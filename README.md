@@ -20,8 +20,7 @@ Once installed, use the Omnata Setup UI to configure a connection to Salesforce,
 ```
 packages:
   - git: "https://github.com/omnata-labs/dbt-omnata-push.git"
-    revision: 0.1.0
-``` 
+    revision: 0.2.0
 
 2) run `dbt deps` (unless you're on dbt cloud).
 
@@ -29,7 +28,7 @@ packages:
 ```
 vars:
   full-refresh-salesforce: false
-  clear-job-tables: false
+  drop-omnata-task-tables: false
 ```
 
 ### Configuring a load task
@@ -57,7 +56,7 @@ Configuration parameters are as follows:
 - `operation`: The Salesforce Bulk API operation type, one of ('delete','hardDelete','insert','update','upsert'). upsert is the most common and easily configured type, since you can re-run flexibly without having to manage side effects.
 - `object_name`: The name of the Salesforce object
 - `external_id_field`: Required for upsert operations, defines which field is used to identify records. This field must be marked as External within Salesforce. If defined, this field must be included in the RECORD field of the model definition.
-- `serial_load`: Set to true to instruction Salesforce to process batches in serial mode. This will significatly impact load performance, so only enable this if you are experiencing errors due to database contention.
+- `serial_load`: Set to true to instruct Salesforce to process batches in serial mode. This will significatly impact load performance, so only enable this if you are experiencing errors due to database contention.
 
 The query must contain a single field, named RECORD. For insert, update, or upsert operations, include any Salesforce fields you like. For delete and hardDelete operations, you must pass in just an "Id" field containing the Salesforce record ID (you may need to retrieve these from the job logs if you aren't already syncing Salesforce data to Snowflake).
 
