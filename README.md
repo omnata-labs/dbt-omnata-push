@@ -17,23 +17,31 @@ Once installed, use the Omnata Setup UI to configure a connection to Salesforce,
 ### dbt project setup
 
 1) Add the omnata-push package as a dependancy in your `packages.yml`:
+
 ```
+
 packages:
   - git: "https://github.com/omnata-labs/dbt-omnata-push.git"
     revision: 0.2.0
 
-2) run `dbt deps` (unless you're on dbt cloud).
+```
+
+2) run `dbt deps`.
 
 3) Add the following vars to your dbt_project.yml:
+
 ```
+
 vars:
   full-refresh-salesforce: false
   drop-omnata-task-tables: false
+  
 ```
 
 ### Configuring a load task
 
 Create a model like the following:
+
 ```
 -- depends_on: {{ ref('omnata_push','sfdc_load_tasks') }}
 -- depends_on: {{ ref('omnata_push','sfdc_load_task_logs') }}
@@ -49,6 +57,7 @@ Create a model like the following:
 select OBJECT_CONSTRUCT('Name',NAME,
                       'AccountID__c',ACCOUNT_ID) as RECORD
 from {{ ref('accounts') }}
+
 ```
 
 Configuration parameters are as follows:
