@@ -131,7 +131,7 @@ where 1=1
 
 ```
 
-### What else can Omnata do
+### What else can Omnata do?
 
 Omnata's other main product is Omnata Connect, which provides real time access to Snowflake data using Salesforce Connect. No middleware required!
 
