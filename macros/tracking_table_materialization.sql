@@ -3,7 +3,7 @@
     {#-- a custom variable (drop-omnata-task-tables=true), since we only destroy tracking tables under more extreme conditions #}
   {% set unique_key = config.get('unique_key') %}
   {% set full_refresh_mode = var('drop-omnata-task-tables') %}
-  {{ log("Salesforce full refresh mode: " ~ full_refresh_mode,True) }}
+  {{ log("Dropping task tables: " ~ full_refresh_mode,True) }}
   {% set target_relation = this %}
   {% set existing_relation = load_relation(this) %}
   {% set tmp_relation = make_temp_relation(this) %}

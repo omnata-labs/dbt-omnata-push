@@ -2,10 +2,8 @@
 -- depends_on: {{ ref('omnata_push','sfdc_load_task_logs') }}
 {{
   config(
-    materialized='omnata_push',
-    app='salesforce',
-    operation='bulk_load',
-    load_type='upsert',
+    materialized='load_task',
+    operation='upsert',
     object_name='Account',
     external_id_field='AccountID__c'
   )

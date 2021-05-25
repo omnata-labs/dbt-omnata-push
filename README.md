@@ -4,15 +4,15 @@
 
 This dbt package contains pre-built models and macros for using [Omnata Push](https://omnata.com) in a dbt project.
 
-Omnata Push is a commercial offering that provides native Salesforce communication from within your Snowflake data warehouse, via External Functions.
+Omnata Push is a commercial offering that provides native data loading from within your Snowflake data warehouse, via External Functions.
 
 ## How do I get started?
 
 ### Omnata installation
 
-First, you need to install Omnata in your Salesforce environment, a free trial can be found on the [AppExchange](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FZFVGUA5).
+First, sign up to Omnata at (https://portal.omnata.com).
 
-Once installed, use the Omnata Setup UI to configure a connection to Salesforce, and you will be provided with External Function definitions to run in your Snowflake account, in the target schema of your dbt run.
+After creating an Omnata Push integration, you will be provided with External Function definitions to run in your Snowflake account, along with a dbt model generator to use with this package.
 
 ### dbt project setup
 
@@ -22,7 +22,7 @@ Once installed, use the Omnata Setup UI to configure a connection to Salesforce,
 
 packages:
   - git: "https://github.com/omnata-labs/dbt-omnata-push.git"
-    revision: 0.2.0
+    revision: 0.3.0
 
 ```
 
@@ -34,21 +34,24 @@ packages:
 
 vars:
   full-refresh-salesforce: false
+  full-refresh-marketing-cloud: false
   drop-omnata-task-tables: false
   
 ```
 
 ### Configuring a load task
 
-Create a model like the following:
+Load task definitions are generated in the Omnata Portal, and look like the following (example shows Salesforce):
 
 ```
 -- depends_on: {{ ref('omnata_push','sfdc_load_tasks') }}
 -- depends_on: {{ ref('omnata_push','sfdc_load_task_logs') }}
 {{
   config(
-    materialized='load_task',
-    operation='upsert',
+    materialized='omnata_push',
+    app='salesforce',
+    operation='bulk_load',
+    load_type='upsert',
     object_name='Account',
     external_id_field='AccountID__c'
   )
@@ -60,8 +63,8 @@ from {{ ref('accounts') }}
 
 ```
 
-Configuration parameters are as follows:
-- `materialized`: always set this to "load_task", this tells dbt to load the data into Salesforce rather than create a table/view
+Salesforce configuration parameters are as follows:
+- `materialized`: always set this to "omnata_push", this tells dbt to load the data into Salesforce rather than create a table/view
 - `operation`: The Salesforce Bulk API operation type, one of ('delete','hardDelete','insert','update','upsert'). upsert is the most common and easily configured type, since you can re-run flexibly without having to manage side effects.
 - `object_name`: The name of the Salesforce object
 - `external_id_field`: Required for upsert operations, defines which field is used to identify records. This field must be marked as External within Salesforce. If defined, this field must be included in the RECORD field of the model definition.
@@ -73,19 +76,27 @@ The two commented lines at the top are required, for the compilation to work.
 
 ### Task history tables
 
-This package automatically creates two long-lived tables:
+This package automatically creates long-lived tables for tracking load history:
+
+#### Salesforce
 - `sfdc_load_tasks`: Contains a record for every Salesforce bulk load job created.
 - `sfdc_load_task_logs`: Contains a record for every record provided to a Salesforce bulk load job.
+#### Marketing Cloud
+- `sfmc_load_tasks`: Contains a record for every Marketing Cloud import performed.
+- `sfmc_load_task_logs`: Contains a record for every record provided to a Marketing Cloud import.
 
-For example, if you include 1000 rows in your load task, afterwards there will be a single record in `sfdc_load_tasks` and 1000 records in `sfdc_load_task_logs`.
+For example, if you include 1000 rows in your Salesforce load task, afterwards there will be a single record in `sfdc_load_tasks` and 1000 records in `sfdc_load_task_logs`.
 
-Both of these tables use a special materialization called `tracking_table`, which is immune to the standard `--full-refresh` flag.
+These tables use a special materialization called `tracking_table`, which is immune to the standard `--full-refresh` flag.
 
 The location of these tables can be overriden in your dbt_project.yml file like so:
 ```
 models:
   omnata_push:
     sfdc:
+      +database: my_other_database
+      +schema: my_other_schema
+    sfmc:
       +database: my_other_database
       +schema: my_other_schema
 ```
@@ -106,8 +117,10 @@ For example, you can reference the `sfdc_load_task_logs` table to ignore previou
 -- depends_on: {{ ref('omnata_push','sfdc_load_task_logs') }}
 {{
   config(
-    materialized='load_task',
-    operation='upsert',
+    materialized='omnata_push',
+    app='salesforce',
+    operation='bulk_load',
+    load_type='upsert',
     object_name='Account',
     external_id_field='AccountID__c'
   )
@@ -133,6 +146,6 @@ where 1=1
 
 ### What else can Omnata do?
 
-Omnata's other main product is Omnata Connect, which provides real time access to Snowflake data using Salesforce Connect. No middleware required!
+Omnata is changing the way that data integration works, by removing complex middleware and providing native capabilities to your existing apps and data warehouses.
 
 To find out more or to contact us, visit our [website](http://omnata.com).

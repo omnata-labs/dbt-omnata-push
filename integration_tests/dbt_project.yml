@@ -22,6 +22,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 vars:
   full-refresh-salesforce: false
+  full-refresh-marketing-cloud: false
   drop-omnata-task-tables: false
 
 # These functions are mocks for the Omnata Salesforce APIs, which are normally External Functions provided by the Omnata setup process
@@ -58,4 +59,22 @@ return {
   \"createdDate\": \"2021-02-03T22:23:17.000+0000\", \"externalIdFieldName\": \"AccountID__c\", \"fastPathEnabled\": false, \"id\": \"7501D000003kWMhQAM\", \"numberBatchesCompleted\": 5, \"numberBatchesFailed\": 0,
   \"numberBatchesInProgress\": 0, \"numberBatchesQueued\": 0, \"numberBatchesTotal\": 5, \"numberRecordsFailed\": 0, \"numberRecordsProcessed\": 1000, \"numberRetries\": 0,
   \"object\": \"Account\", \"operation\": \"upsert\", \"state\": \"Closed\", \"systemModstamp\": \"2021-02-03T22:23:17.000+0000\", \"totalProcessingTime\": 2411
+}';"
+  - "create or replace function SFMC_DATA_EXTENSION_MANAGE(configuration variant)
+returns variant
+language javascript
+strict
+as '
+return {
+  \"data_extension_all_fields_existed\": true,
+  \"data_extension_existed\": true,
+  \"success\": true
+}';"
+  - "create or replace function SFMC_DATA_EXTENSION_IMPORT(parameters variant,record variant)
+returns variant
+language javascript
+strict
+as '
+return {
+  \"success\": true
 }';"
