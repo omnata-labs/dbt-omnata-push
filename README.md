@@ -115,13 +115,14 @@ Omnata Push supports this model by allowing you to target different apps via dif
 
 By default, dbt-omnata-push expects the External Functions to exist in the database and schema defined in the current target, but you can override this with `project.yml` vars like so:
 
+```
 vars:
   omnata_functions_database: OMNATA_FUNCTIONS
   omnata_functions_schema: |
       {%- elif target.name == "prod"  -%} PRODUCTION
       {%- else -%} SANDBOX
       {%- endif -%}
-
+```
 
 For example, if you have a production Salesforce environment as well as a sandbox, simply create the following
 ### Incremental/partial loads
