@@ -22,7 +22,7 @@ After creating an Omnata Push integration, you will be provided with External Fu
 
 packages:
   - git: "https://github.com/omnata-labs/dbt-omnata-push.git"
-    revision: 0.3.0
+    revision: 0.4.0
 
 ```
 
@@ -107,6 +107,23 @@ dbt run --target my_target --vars 'drop-omnata-task-tables: true'
 ```
 You should only need to do this under instruction from Omnata staff.
 
+### Managing multiple app environments
+
+One of the many benefits of dbt is that you develop on branches of code that execute in different target environments. This means you can merge a code change knowing that it yielded the expected result already.
+
+Omnata Push supports this model by allowing you to target different apps via different External Functions, which can be selected based on the dbt target.
+
+By default, dbt-omnata-push expects the External Functions to exist in the database and schema defined in the current target, but you can override this with `project.yml` vars like so:
+
+vars:
+  omnata_functions_database: OMNATA_FUNCTIONS
+  omnata_functions_schema: |
+      {%- elif target.name == "prod"  -%} PRODUCTION
+      {%- else -%} SANDBOX
+      {%- endif -%}
+
+
+For example, if you have a production Salesforce environment as well as a sandbox, simply create the following
 ### Incremental/partial loads
 
 Instead of using the standard `is_incremental` approach, instead use the `full-refresh-salesforce` flag to narrow down which records to include in the load.

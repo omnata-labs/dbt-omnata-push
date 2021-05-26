@@ -6,11 +6,13 @@
     {%- set external_id_field = config.require('external_id_field') -%}
     {%- set serial_load = config.get('serial_load', default=False) -%}
     {%- set temp_table = 'temp_'+omnata_push.random_int(10) -%}
+    {%- set omnata_functions_database = var("omnata_functions_database", target.database) -%}
+    {%- set omnata_functions_schema = var("omnata_functions_schema", target.schema) -%}
     
     {# -- Call the Omnata API to create a load job #}
     {% set query_text %}
     create temp table {{ temp_table }} as(
-        select SFDC_BULK_API_CREATE_JOB('{{ load_type }}','{{ object_name }}',{{ serial_load }},'{{ external_id_field }}') as METADATA
+        select "{{ omnata_functions_database }}"."{{ omnata_functions_schema }}".SFDC_BULK_API_CREATE_JOB('{{ load_type }}','{{ object_name }}',{{ serial_load }},'{{ external_id_field }}') as METADATA
     )
     {% endset %}
     {% set job_creation_result = run_query(query_text) %}
@@ -41,14 +43,14 @@
                 '{{ load_type }}',
                 '{{ external_id_field }}',
                 load_source.record,
-                SFDC_BULK_API_LOAD_BATCH(METADATA:"id",load_source.RECORD,true) as result 
+                "{{ omnata_functions_database }}"."{{ omnata_functions_schema }}".SFDC_BULK_API_LOAD_BATCH(METADATA:"id",load_source.RECORD,true) as result 
         from load_source,{{ temp_table }};
     {%- endcall %}
 
     {# -- Close off the job as a courtesy to Salesforce #}
     {% call statement('main') -%}
         update {{ ref('omnata_push','sfdc_load_tasks') }} load_tasks
-        set close_metadata = SFDC_BULK_API_CLOSE_JOB(METADATA:"id",true)
+        set close_metadata = "{{ omnata_functions_database }}"."{{ omnata_functions_schema }}".SFDC_BULK_API_CLOSE_JOB(METADATA:"id",true)
         from {{ temp_table }}
         where load_tasks.job_id = METADATA:"id";
     {%- endcall %}

@@ -4,6 +4,8 @@
     {%- set force_check = config.get('force_check') -%}
     {%- set data_extension_fields = config.get('data_extension_fields') -%}
     {%- set data_extension_name = config.get('data_extension_name') -%}
+    {%- set omnata_functions_database = var("omnata_functions_database", target.database) -%}
+    {%- set omnata_functions_schema = var("omnata_functions_schema", target.schema) -%}
     
 
     {# -- Store the load job details in the jobs table, including the results of checking the data extension #}
@@ -14,7 +16,7 @@
                '{{ data_extension_name }}',
                '{{ operation }}',
                current_timestamp(),
-               SFMC_DATA_EXTENSION_MANAGE(PARSE_JSON('{"operation":"ensure_exists",
+               "{{ omnata_functions_database }}"."{{ omnata_functions_schema }}".SFMC_DATA_EXTENSION_MANAGE(PARSE_JSON('{"operation":"ensure_exists",
                     "extension_name":"{{ data_extension_name }}",
                     "force":"{{ force_check }}",
                     "extension_fields": {{ data_extension_fields | tojson }}
@@ -33,7 +35,7 @@
                 '{{ data_extension_name }}',
                 '{{ operation }}',
                 load_source.record,
-                SFMC_DATA_EXTENSION_IMPORT(PARSE_JSON('{"name":"{{ data_extension_name }}","operation":"{{ import_type }}"}'),
+                "{{ omnata_functions_database }}"."{{ omnata_functions_schema }}".SFMC_DATA_EXTENSION_IMPORT(PARSE_JSON('{"name":"{{ data_extension_name }}","operation":"{{ import_type }}"}'),
                                            load_source.record) as result 
         from load_source
     {%- endcall %}
