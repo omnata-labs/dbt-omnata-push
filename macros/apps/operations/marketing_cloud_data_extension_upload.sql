@@ -29,15 +29,36 @@
         with load_source as (
             {{ sql }}
         )
+        ,data_indexed as(
+        select row_number() over (partition by null order by null) as row_index,
+        (row_index/100)::int as batch,
+        record
+        from load_source
+        )
+        ,data_staged as(
+        select "{{ omnata_functions_database }}"."{{ omnata_functions_schema }}".SFMC_STAGE_DATA(array_agg(array_construct(row_index,record))) as staged_result
+        from data_indexed
+        group by batch
+        )
+        ,data_imported as(
+            select "{{ omnata_functions_database }}"."{{ omnata_functions_schema }}".SFMC_DE_IMPORT(
+                    PARSE_JSON('{"name":"{{ data_extension_name }}","operation":"{{ import_type }}"}'),
+                    any_value(staged_result)
+                ) as import_result
+            from data_staged
+        ),
+        data_import_result as(
+        select any_value(import_result) as import_result_output
+        from data_imported
+        )
         select '{{ job_id }}' as job_id,
                 UUID_STRING() as job_log_entry_id,
                 '{{ load_task_name }}',
                 '{{ data_extension_name }}',
                 '{{ operation }}',
-                load_source.record,
-                "{{ omnata_functions_database }}"."{{ omnata_functions_schema }}".SFMC_DATA_EXTENSION_IMPORT(PARSE_JSON('{"name":"{{ data_extension_name }}","operation":"{{ import_type }}"}'),
-                                           load_source.record) as result 
-        from load_source
+                record,
+                "{{ omnata_functions_database }}"."{{ omnata_functions_schema }}".SFMC_FETCH_RESULTS(import_result_output,row_index) as result
+        from data_indexed,data_import_result
     {%- endcall %}
 
     {{ adapter.commit() }}

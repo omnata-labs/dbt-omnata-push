@@ -25,7 +25,7 @@ vars:
   full-refresh-marketing-cloud: false
   drop-omnata-task-tables: false
 
-# These functions are mocks for the Omnata Salesforce APIs, which are normally External Functions provided by the Omnata setup process
+# These functions are mocks for the Omnata Salesforce/SFMC APIs, which are normally External Functions provided by the Omnata setup process
 on-run-start:
   - "create or replace function SFDC_BULK_API_CREATE_JOB(operation varchar, table_name varchar, use_serial boolean, external_id_field_name varchar)
 returns variant
@@ -70,7 +70,19 @@ return {
   \"data_extension_existed\": true,
   \"success\": true
 }';"
-  - "create or replace function SFMC_DATA_EXTENSION_IMPORT(parameters variant,record variant)
+  - "create or replace function SFMC_STAGE_DATA(record variant)
+returns varchar
+language javascript
+strict
+as '
+return '''abcd'''' ';"
+  - "create or replace function SFMC_DE_IMPORT(configuration variant,stage_data_query_id varchar)
+returns varchar
+language javascript
+strict
+as '
+return '''abcd'''' ';"
+  - "create or replace function SFMC_FETCH_RESULTS(stage_data_query_id varchar,row_index int)
 returns variant
 language javascript
 strict
