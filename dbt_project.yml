@@ -1,5 +1,5 @@
 name: 'omnata_push'
-version: '0.6.0'
+version: '0.8.0'
 config-version: 2
 
 # This setting configures which "profile" dbt uses for this project.

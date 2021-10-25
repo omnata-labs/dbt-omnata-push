@@ -8,11 +8,13 @@
     {%- set data_extension_name = config.get('data_extension_name') -%}
     {%- set omnata_functions_database = var("omnata_functions_database", target.database) -%}
     {%- set omnata_functions_schema = var("omnata_functions_schema", target.schema) -%}
+    {%- set temp_table_database = var("temp_table_database", generate_database_name()) -%}
+    {%- set temp_table_schema = var("temp_table_schema", generate_schema_name(custom_schema_name=None)) -%}
     {%- set temp_table = 'temp_'+omnata_push.random_int(10) -%}
 
     {# -- Store the load job details in the jobs table, including the results of checking the data extension #}
     {% call statement('main') -%}
-        create temp table {{ temp_table }} as(
+        create temp table "{{ temp_table_database }}"."{{ temp_table_schema }}".{{ temp_table }} as(
             select "{{ omnata_functions_database }}"."{{ omnata_functions_schema }}".SFMC_DATA_EXTENSION_MANAGE(PARSE_JSON('{"operation":"ensure_exists",
                     "extension_name":"{{ data_extension_name }}",
                     "force":"{{ force_check }}",
