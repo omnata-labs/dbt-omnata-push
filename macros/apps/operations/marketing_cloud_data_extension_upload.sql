@@ -6,6 +6,7 @@
     {%- set gpg_public_key = config.get('gpg_public_key') -%}
     {%- set data_extension_fields = config.get('data_extension_fields') -%}
     {%- set data_extension_name = config.get('data_extension_name') -%}
+    {%- set file_location_external_key = config.get('file_location_external_key',default='ExactTarget Enhanced FTP') -%}
     {%- set omnata_functions_database = var("omnata_functions_database", target.database) -%}
     {%- set omnata_functions_schema = var("omnata_functions_schema", target.schema) -%}
     {%- set temp_table_database = var("temp_table_database", generate_database_name()) -%}
@@ -34,7 +35,7 @@
 
         with load_parameters as(
         -- This section determines the data import settings
-        select PARSE_JSON('{"name":"{{ data_extension_name }}","operation":"{{ import_type }}","encrypted": {{ encrypted_load }} }') as import_parameters, metadata_creation_result
+        select PARSE_JSON('{"name":"{{ data_extension_name }}","operation":"{{ import_type }}","encrypted": {{ encrypted_load }}, "file_location_external_key": "{{ file_location_external_key }}" }') as import_parameters, metadata_creation_result
         from "{{ temp_table_database }}"."{{ temp_table_schema }}".{{ temp_table }}
         )
         ,load_source as(
