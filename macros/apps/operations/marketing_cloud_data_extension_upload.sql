@@ -35,7 +35,7 @@
         with load_parameters as(
         -- This section determines the data import settings
         select PARSE_JSON('{"name":"{{ data_extension_name }}","operation":"{{ import_type }}","encrypted": {{ encrypted_load }} }') as import_parameters, metadata_creation_result
-        from {{ temp_table }}
+        from "{{ temp_table_database }}"."{{ temp_table_schema }}".{{ temp_table }}
         )
         ,load_source as(
         -- This section determines which data is uploaded to Marketing Cloud, and the field names
