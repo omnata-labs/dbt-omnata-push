@@ -74,6 +74,20 @@ The query must contain a single field, named RECORD. For insert, update, or upse
 
 The two commented lines at the top are required, for the compilation to work.
 
+Marketing Cloud configuration parameters are as follows:
+- `materialized`: always set this to "omnata_push", this tells dbt to load the data into Salesforce rather than create a table/view,
+- `file_location_external_key`: (optional) If the CustomerKey of your FTP import folder isn't "ExactTarget Enhanced FTP", specify it here. In some installations it is named "ExactTarget Enhanced FTP - Import".
+- `operation`: The Marketing Cloud operation, currently only 'data_extension_upload' is supported.
+- `import_type`: one of ('AddOnly','UpdateOnly','AddAndUpdate','Overwrite'). Described here: https://help.salesforce.com/s/articleView?id=sf.mc_as_update_a_list_or_data_extension_using_an_external_file.htm&type=5 
+- `data_extension_name`: The name of the data extension to upload to.
+- `data_extension_path`: (Optional) The folder path to the data extension. E.g. 'Data Extensions/MyFolder/MySubfolder'
+- `data_extension_fields`: an array containing an object per data extension column. Fields as per https://developer.salesforce.com/docs/atlas.en-us.noversion.mc-sdks.meta/mc-sdks/data-extension-create.htm
+- `data_extension_properties`: An object containing properties for the data extension, as per https://developer.salesforce.com/docs/atlas.en-us.noversion.mc-sdks.meta/mc-sdks/data-extension-create.htm
+- `force_check`: (True or False) Forces a check of the Data Extension in marketing cloud, instead of a cached definition. This may be necessary if the Data Extension is changed in Marketing Cloud after Omnata Push creates/updates it.
+- `encrypted`: (True or False). GPG encrypts the payload within Snowflake before sending to Omnata's API layer. This requires the GPG private key to be configured in Marketing Cloud, per onboarding instructions.
+- `gpg_public_key`: The public GPG key to use to encrypt the payload. Includes the enclosing '-----BEGIN PGP PUBLIC KEY BLOCK----- .... -----END PGP PUBLIC KEY BLOCK-----'
+
+
 ### Task history tables
 
 This package automatically creates long-lived tables for tracking load history:

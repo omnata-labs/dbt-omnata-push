@@ -6,6 +6,8 @@
     {%- set gpg_public_key = config.get('gpg_public_key') -%}
     {%- set data_extension_fields = config.get('data_extension_fields') -%}
     {%- set data_extension_name = config.get('data_extension_name') -%}
+    {%- set data_extension_path = config.get('data_extension_path',None) -%}
+    {%- set data_extension_properties = config.get('data_extension_properties',None) -%}
     {%- set file_location_external_key = config.get('file_location_external_key',default='ExactTarget Enhanced FTP') -%}
     {%- set omnata_functions_database = var("omnata_functions_database", target.database) -%}
     {%- set omnata_functions_schema = var("omnata_functions_schema", target.schema) -%}
@@ -18,6 +20,12 @@
         create temp table "{{ temp_table_database }}"."{{ temp_table_schema }}".{{ temp_table }} as(
             select "{{ omnata_functions_database }}"."{{ omnata_functions_schema }}".SFMC_DATA_EXTENSION_MANAGE(PARSE_JSON('{"operation":"ensure_exists",
                     "extension_name":"{{ data_extension_name }}",
+{%- if data_extension_path %}
+                    "extension_path":"{{ data_extension_path }}",        
+{% endif -%}
+{%- if data_extension_properties %}
+                    "extension_properties":{{ data_extension_properties | tojson }},        
+{% endif -%}
                     "force":"{{ force_check }}",
                     "extension_fields": {{ data_extension_fields | tojson }}
                 }')) as metadata_creation_result
