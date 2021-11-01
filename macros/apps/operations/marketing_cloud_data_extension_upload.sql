@@ -26,7 +26,7 @@
 {%- if data_extension_properties %}
                     "extension_properties":{{ data_extension_properties | tojson }},        
 {% endif -%}
-                    "force":"{{ force_check }}",
+                    "force":{{ force_check }},
                     "extension_fields": {{ data_extension_fields | tojson }}
                 }')) as metadata_creation_result
         )
