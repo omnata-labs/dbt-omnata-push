@@ -8,10 +8,10 @@ profile: 'integration_tests'
 # These configurations specify where dbt should look for different types of files.
 # The `source-paths` config, for example, states that models in this project can be
 # found in the "models/" directory. You probably won't need to change these!
-source-paths: ["models"]
+model-paths: ["models"]
 analysis-paths: ["analysis"]
 test-paths: ["tests"]
-data-paths: ["data"]
+seed-paths: ["data"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
 
@@ -75,14 +75,14 @@ returns varchar
 language javascript
 strict
 as '
-return '''abcd'''' ';"
+return ''abcd'' ';"
   - "create or replace function SFMC_DE_IMPORT(configuration variant,stage_data_query_id varchar)
 returns varchar
 language javascript
 strict
 as '
-return '''abcd'''' ';"
-  - "create or replace function SFMC_FETCH_RESULTS(stage_data_query_id varchar,row_index int)
+return ''abcd'' ';"
+  - "create or replace function SFMC_FETCH_RESULTS(stage_data_query_id varchar,row_index float)
 returns variant
 language javascript
 strict
@@ -90,3 +90,9 @@ as '
 return {
   \"success\": true
 }';"
+  - "create or replace function SFMC_AWAIT_RESULTS_POLL(QUERY_ID varchar)
+returns boolean
+language javascript
+strict
+as '
+return true';"

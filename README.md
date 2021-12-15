@@ -22,7 +22,7 @@ After creating an Omnata Push integration, you will be provided with External Fu
 
 packages:
   - git: "https://github.com/omnata-labs/dbt-omnata-push.git"
-    revision: 0.7.0
+    revision: 0.10.0
 
 ```
 
